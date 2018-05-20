@@ -36,7 +36,6 @@ public class NavigationDrawer extends ScrollView implements Themed {
     public static final int NAVIGATION_ITEM_DONATE = 1005;
     public static final int NAVIGATION_ITEM_SETTINGS = 1006;
     public static final int NAVIGATION_ITEM_AFFIX = 1007;
-    public static final int NAVIGATION_ITEM_EFFECTS = 1008;
     public static final int NAVIGATION_ITEM_ABOUT = 1009;
     public static final int NAVIGATION_ITEM_TIMELINE = 1010;
 
@@ -48,9 +47,8 @@ public class NavigationDrawer extends ScrollView implements Themed {
 
     @IntDef({NAVIGATION_ITEM_ALL_ALBUMS, NAVIGATION_ITEM_ALL_MEDIA, NAVIGATION_ITEM_HIDDEN_FOLDERS,
             NAVIGATION_ITEM_WALLPAPERS, NAVIGATION_ITEM_DONATE, NAVIGATION_ITEM_SETTINGS, NAVIGATION_ITEM_AFFIX,
-            NAVIGATION_ITEM_EFFECTS, NAVIGATION_ITEM_ABOUT, NAVIGATION_ITEM_TIMELINE})
-    public @interface NavigationItem {
-    }
+            NAVIGATION_ITEM_ABOUT, NAVIGATION_ITEM_TIMELINE})
+    public @interface NavigationItem {}
 
     @BindView(R.id.navigation_drawer_header) ViewGroup drawerHeader;
 
@@ -62,7 +60,6 @@ public class NavigationDrawer extends ScrollView implements Themed {
     @BindView(R.id.navigation_item_donate) NavigationEntry donateEntry;
     @BindView(R.id.navigation_item_settings) NavigationEntry settingsEntry;
     @BindView(R.id.navigation_item_affix) NavigationEntry affixEntry;
-    @BindView(R.id.navigation_item_effects) NavigationEntry effectsEntry;
     @BindView(R.id.navigation_item_about) NavigationEntry aboutEntry;
     @BindView(R.id.navigation_drawer_header_version) TextView appVersion;
 
@@ -147,7 +144,7 @@ public class NavigationDrawer extends ScrollView implements Themed {
 
         navigationEntries = new NavigationEntry[]
                 {albumsEntry, mediaEntry, hiddenFoldersEntry, wallpapersEntry, donateEntry,
-                        settingsEntry, affixEntry, effectsEntry, aboutEntry, timelineEntry};
+                        settingsEntry, affixEntry, aboutEntry, timelineEntry};
         setupListeners();
 
         selectedEntry = albumsEntry;
@@ -195,8 +192,6 @@ public class NavigationDrawer extends ScrollView implements Themed {
                 return NAVIGATION_ITEM_SETTINGS;
             case R.id.navigation_item_affix:
                 return NAVIGATION_ITEM_AFFIX;
-            case R.id.navigation_item_effects:
-                return NAVIGATION_ITEM_EFFECTS;
             case R.id.navigation_item_about:
                 return NAVIGATION_ITEM_ABOUT;
         }
