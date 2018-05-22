@@ -4,17 +4,12 @@ import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.util.Pair;
 
+import org.horaapps.leafpic.progress.ProgressException;
 import org.horaapps.leafpic.util.StringUtils;
-import org.horaapps.leafpic.util.file.DeleteException;
 
 import java.io.File;
-import java.util.ArrayList;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
 import io.reactivex.Observable;
 
 /**
@@ -24,39 +19,23 @@ import io.reactivex.Observable;
 public class MediaHelper {
     private static Uri external = MediaStore.Files.getContentUri("external");
 
-
-
-    public static Observable<Media> deleteMedia(Context context, Media mediaToDelete) {
+    public static Observable<Media> deleteMedia(Context context, Media media) {
         return Observable.create(subscriber -> {
-            boolean deleteSuccess = internalDeleteMedia(context, mediaToDelete);
-            if (deleteSuccess) subscriber.onNext(mediaToDelete);
-            else subscriber.onError(new DeleteException(mediaToDelete));
+            try {
+                internalDeleteMedia(context, media);
+                subscriber.onNext(media);
+            } catch (ProgressException e) {
+                subscriber.onError(e);
+            }
             subscriber.onComplete();
         });
     }
 
-
-    public static Flowable<Pair<Media, Boolean>> deleteMedia(Context context, ArrayList<Media> mediaToDelete) {
-        return Flowable.create(subscriber -> {
-            for (Media media : mediaToDelete) {
-                if (subscriber.isCancelled()) {
-                    break;
-                }
-                boolean deleteSuccess = internalDeleteMedia(context, media);
-                Log.v("delete-internal", media.getPath() + " " + deleteSuccess);
-                subscriber.onNext(new Pair<>(media, deleteSuccess));
-            }
-            subscriber.onComplete();
-        }, BackpressureStrategy.BUFFER);
-    }
-
-    public static boolean internalDeleteMedia(Context context, Media media) {
+    public static boolean internalDeleteMedia(Context context, Media media) throws ProgressException {
         File file = new File(media.getPath());
-        boolean success = StorageHelper.deleteFile(context, file);
-        if (success)
-            context.getContentResolver().delete(external,
-                    MediaStore.MediaColumns.DATA + "=?", new String[]{file.getPath()});
-        return success;
+        StorageHelper.deleteFile(context, file);
+        context.getContentResolver().delete(external, MediaStore.MediaColumns.DATA + "=?", new String[]{file.getPath()});
+        return true;
     }
 
     public static boolean renameMedia(Context context, Media media, String newName) {

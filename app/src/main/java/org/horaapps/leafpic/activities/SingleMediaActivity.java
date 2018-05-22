@@ -65,7 +65,6 @@ import org.horaapps.leafpic.util.LegacyCompatFileProvider;
 import org.horaapps.leafpic.util.Measure;
 import org.horaapps.leafpic.util.Security;
 import org.horaapps.leafpic.util.StringUtils;
-import org.horaapps.leafpic.util.file.DeleteException;
 import org.horaapps.leafpic.util.preferences.Prefs;
 import org.horaapps.leafpic.views.HackyViewPager;
 import org.horaapps.liz.ColorPalette;
@@ -79,6 +78,7 @@ import java.util.Collections;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -181,7 +181,7 @@ public class SingleMediaActivity extends SharedMediaActivity implements BaseMedi
 
         ArrayList<Media> list = new ArrayList<>();
 
-        CPHelper.getMedia(getApplicationContext(), album)
+        Disposable disposable = CPHelper.getMedia(getApplicationContext(), album)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .filter(media -> MediaFilter.getFilter(album.filterMode()).accept(media) && !media.equals(m))
@@ -209,6 +209,8 @@ public class SingleMediaActivity extends SharedMediaActivity implements BaseMedi
                             updatePageTitle(position);
 
                         });
+
+        disposeLater(disposable);
     }
 
     private void loadUri(Uri uri) {
@@ -460,7 +462,7 @@ public class SingleMediaActivity extends SharedMediaActivity implements BaseMedi
     private void deleteCurrentMedia() {
         Media currentMedia = getCurrentMedia();
 
-        MediaHelper.deleteMedia(getApplicationContext(), currentMedia)
+        Disposable disposable = MediaHelper.deleteMedia(getApplicationContext(), currentMedia)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(deleted -> {
@@ -470,15 +472,16 @@ public class SingleMediaActivity extends SharedMediaActivity implements BaseMedi
                             }
                         },
                         err -> {
-                            if (err instanceof DeleteException)
-                                Toast.makeText(this, R.string.delete_error, Toast.LENGTH_SHORT).show();
-                            else
-                                Toast.makeText(this, err.getMessage(), Toast.LENGTH_SHORT).show();
+                            // TODO: 21/05/18 add progress show errors better?
+
+                            Toast.makeText(getApplicationContext(), err.getMessage(), Toast.LENGTH_SHORT).show();
                         },
                         () -> {
                             adapter.notifyDataSetChanged();
                             updatePageTitle(mViewPager.getCurrentItem());
                         });
+
+        disposeLater(disposable);
 
 
     }
